@@ -141,7 +141,8 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                     <TableHead>Task</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Priority Score</TableHead>
-                    <TableHead>Time</TableHead>
+                    <TableHead>Deadline</TableHead>
+                    <TableHead>Date Added</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Schedule</TableHead>
                   </TableRow>
@@ -185,9 +186,13 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                           </div>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {formatTime(task.estimatedTime)}
+                          <div className="text-sm text-muted-foreground">
+                            {task.deadline ? task.deadline.toLocaleDateString() : '—'}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm text-muted-foreground">
+                            {task.createdAt.toLocaleDateString()}
                           </div>
                         </TableCell>
                         <TableCell>
