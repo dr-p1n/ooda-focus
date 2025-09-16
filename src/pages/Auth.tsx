@@ -6,9 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, Zap, TrendingUp, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Target, Zap, TrendingUp, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Auth() {
   const { signUp, signIn, user, loading } = useAuth();
@@ -19,6 +20,8 @@ export default function Auth() {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -95,6 +98,26 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      redirectTo: `${window.location.origin}/`,
+    });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setSuccess('Password reset email sent! Check your inbox for further instructions.');
+      setForgotPasswordEmail('');
+    }
+
+    setIsLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -124,13 +147,75 @@ export default function Auth() {
         </div>
 
         <Card className="shadow-lg">
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login">
+          {showForgotPassword ? (
+            <div>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setShowForgotPassword(false)}
+                    className="p-1"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                  </Button>
+                  <CardTitle>Reset Password</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="forgot-email">Email Address</Label>
+                    <Input
+                      id="forgot-email"
+                      type="email"
+                      value={forgotPasswordEmail}
+                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                      placeholder="Enter your email address"
+                      required
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      We'll send you a link to reset your password.
+                    </p>
+                  </div>
+                  
+                  {error && (
+                    <Alert>
+                      <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  {success && (
+                    <Alert>
+                      <AlertDescription className="text-success">{success}</AlertDescription>
+                    </Alert>
+                  )}
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-gradient-primary" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending Reset Email...
+                      </>
+                    ) : (
+                      'Send Reset Email'
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </div>
+          ) : (
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login">
               <CardHeader>
                 <CardTitle>Welcome Back</CardTitle>
               </CardHeader>
@@ -195,6 +280,17 @@ export default function Auth() {
                       'Sign In'
                     )}
                   </Button>
+                  
+                  <div className="text-center">
+                    <Button 
+                      type="button"
+                      variant="link" 
+                      className="text-sm text-muted-foreground"
+                      onClick={() => setShowForgotPassword(true)}
+                    >
+                      Forgot your password?
+                    </Button>
+                  </div>
                 </form>
               </CardContent>
             </TabsContent>
@@ -324,7 +420,8 @@ export default function Auth() {
                 </form>
               </CardContent>
             </TabsContent>
-          </Tabs>
+            </Tabs>
+          )}
         </Card>
         
         <div className="text-center text-sm text-muted-foreground">
