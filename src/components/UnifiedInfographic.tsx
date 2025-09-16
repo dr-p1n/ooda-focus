@@ -19,10 +19,10 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
 
   const renderEisenhowerMatrix = () => {
     const quadrants = {
-      urgent_important: incompleteTasks.filter(t => t.urgency >= 4 && t.importance >= 4),
-      not_urgent_important: incompleteTasks.filter(t => t.urgency < 4 && t.importance >= 4),
-      urgent_not_important: incompleteTasks.filter(t => t.urgency >= 4 && t.importance < 4),
-      not_urgent_not_important: incompleteTasks.filter(t => t.urgency < 4 && t.importance < 4),
+      urgent_important: incompleteTasks.filter(t => t.urgency >= 3 && t.importance >= 3),
+      not_urgent_important: incompleteTasks.filter(t => t.urgency < 3 && t.importance >= 3),
+      urgent_not_important: incompleteTasks.filter(t => t.urgency >= 3 && t.importance < 3),
+      not_urgent_not_important: incompleteTasks.filter(t => t.urgency < 3 && t.importance < 3),
     };
 
     const QuadrantCard = ({ 
@@ -92,8 +92,8 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
   };
 
   const renderImpactCostPlot = () => {
-    const maxImpact = Math.max(...incompleteTasks.map(t => t.impact), 5);
-    const maxEffort = Math.max(...incompleteTasks.map(t => t.effort), 5);
+    const maxImpact = Math.max(...incompleteTasks.map(t => t.impact), 3);
+    const maxEffort = Math.max(...incompleteTasks.map(t => t.effort), 3);
 
     return (
       <div className="relative h-64 bg-muted/10 rounded-lg border p-4">
@@ -124,12 +124,12 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
           return (
             <div
               key={task.id}
-              className={`absolute w-3 h-3 rounded-full cursor-pointer transform -translate-x-1/2 -translate-y-1/2 ${
+                 className={`absolute w-3 h-3 rounded-full cursor-pointer transform -translate-x-1/2 -translate-y-1/2 ${
                 selectedTask?.id === task.id 
                   ? 'bg-primary scale-150 ring-2 ring-primary/50' 
-                  : metrics.priorityScore >= 7 
+                  : metrics.priorityScore >= 6 
                     ? 'bg-destructive hover:scale-125'
-                    : metrics.priorityScore >= 5 
+                    : metrics.priorityScore >= 4 
                       ? 'bg-warning hover:scale-125'
                       : 'bg-success hover:scale-125'
               }`}
@@ -192,10 +192,10 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
                 <Clock className="h-3 w-3" />
                 Time: {Math.floor(selectedTask.estimatedTime / 60)}h {selectedTask.estimatedTime % 60}m
               </div>
-              <div>Importance: {selectedTask.importance}/5</div>
-              <div>Urgency: {selectedTask.urgency}/5</div>
-              <div>Impact: {selectedTask.impact}/5</div>
-              <div>Effort: {selectedTask.effort}/5</div>
+              <div>Importance: {selectedTask.importance}/3</div>
+              <div>Urgency: {selectedTask.urgency}/3</div>
+              <div>Impact: {selectedTask.impact}/3</div>
+              <div>Effort: {selectedTask.effort}/3</div>
             </div>
             {selectedTask.description && (
               <p className="text-sm text-muted-foreground mt-2">{selectedTask.description}</p>
@@ -206,18 +206,18 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
         {/* Quick Stats */}
         <div className="grid grid-cols-3 gap-2 text-center text-xs">
           <div className="p-2 bg-success/10 rounded border border-success/20">
-            <div className="font-semibold text-success">{incompleteTasks.filter(t => calculateTaskMetrics(t).priorityScore < 5).length}</div>
+            <div className="font-semibold text-success">{incompleteTasks.filter(t => calculateTaskMetrics(t).priorityScore < 4).length}</div>
             <div className="text-muted-foreground">Low Priority</div>
           </div>
           <div className="p-2 bg-warning/10 rounded border border-warning/20">
             <div className="font-semibold text-warning">{incompleteTasks.filter(t => {
               const score = calculateTaskMetrics(t).priorityScore;
-              return score >= 5 && score < 7;
+              return score >= 4 && score < 6;
             }).length}</div>
             <div className="text-muted-foreground">Medium Priority</div>
           </div>
           <div className="p-2 bg-destructive/10 rounded border border-destructive/20">
-            <div className="font-semibold text-destructive">{incompleteTasks.filter(t => calculateTaskMetrics(t).priorityScore >= 7).length}</div>
+            <div className="font-semibold text-destructive">{incompleteTasks.filter(t => calculateTaskMetrics(t).priorityScore >= 6).length}</div>
             <div className="text-muted-foreground">High Priority</div>
           </div>
         </div>
