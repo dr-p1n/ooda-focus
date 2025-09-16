@@ -221,7 +221,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_collaborator: {
+        Args: { profile_user_id: string; requesting_user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
