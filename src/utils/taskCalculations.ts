@@ -89,6 +89,6 @@ export function sortTasks(tasks: Task[], sortBy: string): Task[] {
 }
 
 export function generateOptimalSchedule(tasks: Task[]): Task[] {
-  // OODA Loop optimization: prioritize high-value, low-effort tasks first
+  // Time cost balance optimization: prioritize high-value, low-effort tasks first
   return sortTasks(tasks.filter(t => t.status !== 'complete'), 'scheduling-weight-desc');
 }

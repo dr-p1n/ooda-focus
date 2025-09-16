@@ -102,9 +102,9 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Strategic Task Manager</h1>
+          <h1 className="text-3xl font-bold text-foreground">Agenta</h1>
           <p className="text-muted-foreground">
-            OODA Loop optimization through Eisenhower Matrix and Impact/Cost analysis
+            Time cost balance sheet through Eisenhower Matrix and Impact/Cost analysis
           </p>
         </div>
         <Button onClick={onCreateTask} className="bg-gradient-primary">

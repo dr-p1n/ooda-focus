@@ -142,8 +142,8 @@ export default function Auth() {
               <TrendingUp className="h-6 w-6 text-warning" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground">Strategic Task Manager</h1>
-          <p className="text-muted-foreground">OODA Loop optimization through unified task analysis</p>
+          <h1 className="text-3xl font-bold text-foreground">Agenta</h1>
+          <p className="text-muted-foreground">Time cost balance sheet through unified task analysis</p>
         </div>
 
         <Card className="shadow-lg">
