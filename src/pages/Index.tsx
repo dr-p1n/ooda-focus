@@ -4,13 +4,14 @@ import { SimplifiedDashboard } from '@/components/SimplifiedDashboard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Loader2 } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import Auth from './Auth';
 
 // Sample data for demonstration
 const sampleTasks: Task[] = [
@@ -181,8 +182,21 @@ const sampleTasks: Task[] = [
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(sampleTasks);
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
   const { toast } = useToast();
+
+  // Redirect to auth if not authenticated
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
 
   const handleSignOut = async () => {
     const { error } = await signOut();
