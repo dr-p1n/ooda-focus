@@ -5,6 +5,7 @@ import { UnifiedInfographic } from '@/components/UnifiedInfographic';
 import { TaskFormDialog } from '@/components/TaskFormDialog';
 import { ProjectDialog } from '@/components/ProjectDialog';
 import { InviteDialog } from '@/components/InviteDialog';
+import { ProjectInviteDialog } from '@/components/ProjectInviteDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -119,6 +120,22 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
         title: "Success",
         description: "Project created successfully!",
       });
+    }
+  };
+
+  const inviteUserToProject = async (projectId: string, email: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('project_invitations')
+      .insert({
+        project_id: projectId,
+        invited_by: user.id,
+        invited_email: email
+      });
+
+    if (error) {
+      throw error;
     }
   };
 
@@ -247,6 +264,56 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
           </div>
         </CardContent>
       </Card>
+
+      {/* Projects Section */}
+      {projects.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FolderPlus className="h-5 w-5" />
+              Your Projects
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.map((project) => (
+                <div 
+                  key={project.id} 
+                  className="flex items-center justify-between p-3 border border-border rounded-lg bg-card hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 flex-1">
+                    <div 
+                      className="w-4 h-4 rounded-full flex-shrink-0" 
+                      style={{ backgroundColor: project.color }}
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-foreground truncate">{project.name}</h3>
+                      {project.description && (
+                        <p className="text-sm text-muted-foreground truncate">{project.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs text-muted-foreground mr-2">
+                      {tasks.filter(t => t.project_id === project.id).length} tasks
+                    </span>
+                    <ProjectInviteDialog 
+                      projectId={project.id}
+                      projectName={project.name}
+                      onInvite={inviteUserToProject}
+                      trigger={
+                        <Button variant="ghost" size="sm">
+                          <UserPlus className="h-4 w-4" />
+                        </Button>
+                      }
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Task Table */}

@@ -18,6 +18,16 @@ export interface TaskInvitation {
   updated_at: Date;
 }
 
+export interface ProjectInvitation {
+  id: string;
+  project_id: string;
+  invited_by: string;
+  invited_email: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface Task {
   id: string;
   title: string;
