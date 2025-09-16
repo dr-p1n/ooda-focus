@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Task } from '@/types/task';
 import { calculateTaskMetrics } from '@/utils/taskCalculations';
 import { UnifiedInfographic } from '@/components/UnifiedInfographic';
+import { TaskFormDialog } from '@/components/TaskFormDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Target, Clock } from 'lucide-react';
+import { Plus, Target, Edit } from 'lucide-react';
 
 interface SimplifiedDashboardProps {
   tasks: Task[];
@@ -132,7 +133,20 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <CardTitle>Tasks Overview</CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle>Tasks Overview</CardTitle>
+                <TaskFormDialog 
+                  onSave={(taskData) => {
+                    const newTask: Task = {
+                      ...taskData,
+                      id: Date.now().toString(),
+                      createdAt: new Date(),
+                      modifiedAt: new Date(),
+                    };
+                    onTaskUpdate([...tasks, newTask]);
+                  }}
+                />
+              </div>
             </CardHeader>
             <CardContent>
               <Table>
@@ -144,6 +158,7 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                     <TableHead>Deadline</TableHead>
                     <TableHead>Date Added</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -175,8 +190,8 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                             <Badge 
                               variant="outline" 
                               className={`font-mono ${
-                                metrics.priorityScore >= 7 ? 'bg-destructive/20 text-destructive border-destructive/30' :
-                                metrics.priorityScore >= 5 ? 'bg-warning/20 text-warning border-warning/30' :
+                                metrics.priorityScore >= 6 ? 'bg-destructive/20 text-destructive border-destructive/30' :
+                                metrics.priorityScore >= 4 ? 'bg-warning/20 text-warning border-warning/30' :
                                 'bg-success/20 text-success border-success/30'
                               }`}
                             >
@@ -208,6 +223,28 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                               <SelectItem value="complete">Complete</SelectItem>
                             </SelectContent>
                           </Select>
+                        </TableCell>
+                        <TableCell>
+                          <TaskFormDialog 
+                            task={task}
+                            onSave={(taskData) => {
+                              const updatedTasks = tasks.map(t => 
+                                t.id === task.id 
+                                  ? { ...taskData, id: task.id, createdAt: task.createdAt, modifiedAt: new Date() }
+                                  : t
+                              );
+                              onTaskUpdate(updatedTasks);
+                            }}
+                            onDelete={(taskId) => {
+                              const filteredTasks = tasks.filter(t => t.id !== taskId);
+                              onTaskUpdate(filteredTasks);
+                            }}
+                            trigger={
+                              <Button variant="ghost" size="sm" onClick={(e) => e.stopPropagation()}>
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            }
+                          />
                         </TableCell>
                       </TableRow>
                     );

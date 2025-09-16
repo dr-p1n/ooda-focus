@@ -11,22 +11,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Target, Zap, Weight, Clock } from 'lucide-react';
+import { CalendarIcon, Plus, Target, Zap, Weight, Clock, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface TaskFormDialogProps {
   task?: Task;
   onSave: (task: Omit<Task, 'id' | 'createdAt' | 'modifiedAt'>) => void;
+  onDelete?: (taskId: string) => void;
   trigger?: React.ReactNode;
 }
 
-export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
+export function TaskFormDialog({ task, onSave, onDelete, trigger }: TaskFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: task?.title || '',
     description: task?.description || '',
-    category: task?.category || 'General',
+    category: task?.category || 'Work',
     notes: task?.notes || '',
     importance: task?.importance || 2,
     urgency: task?.urgency || 2,
@@ -41,8 +42,8 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
   });
 
   const categories = [
-    'General', 'Work', 'Personal', 'Health', 'Learning', 'Finance', 
-    'Relationships', 'Creative', 'Maintenance', 'Strategic'
+    'Work', 'Personal', 'Learning', 'Health', 'Finance', 
+    'Creative', 'Maintenance', 'Strategic'
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -60,7 +61,7 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
       setFormData({
         title: '',
         description: '',
-        category: 'General',
+        category: 'Work',
         notes: '',
         importance: 2,
         urgency: 2,
@@ -76,14 +77,21 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
     }
   };
 
+  const handleDelete = () => {
+    if (task && onDelete) {
+      onDelete(task.id);
+      setOpen(false);
+    }
+  };
+
   const calculatePreviewScore = () => {
     return formData.importance + formData.urgency + formData.impact - formData.effort;
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 10) return 'text-danger';
-    if (score >= 7) return 'text-warning';
-    if (score >= 4) return 'text-success';
+    if (score >= 6) return 'text-danger';
+    if (score >= 4) return 'text-warning';
+    if (score >= 2) return 'text-success';
     return 'text-muted-foreground';
   };
 
@@ -165,7 +173,7 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
                 value={formData.description}
                 onChange={(e) => setFormData({...formData, description: e.target.value})}
                 placeholder="Provide more details about this task..."
-                rows={3}
+                rows={2}
               />
             </div>
           </div>
@@ -177,17 +185,12 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
                 <Target className="h-5 w-5" />
                 Task Scoring
               </CardTitle>
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className={cn("font-mono", getScoreColor(calculatePreviewScore()))}>
-                  Priority Score: {calculatePreviewScore()}
-                </Badge>
-                <Badge variant="secondary" className="font-mono">
-                  Est. Time: {formatTime(formData.estimatedTime)}
-                </Badge>
-              </div>
+              <Badge variant="outline" className={cn("font-mono w-fit", getScoreColor(calculatePreviewScore()))}>
+                Priority Score: {calculatePreviewScore()}
+              </Badge>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-analytics" />
@@ -274,17 +277,12 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
                   step={15}
                   className="w-full"
                 />
-                <div className="text-xs text-muted-foreground">
-                  How long will this take to complete?
-                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Scheduling */}
+          {/* Optional Details */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Scheduling</h3>
-            
             <div className="space-y-2">
               <Label>Deadline (Optional)</Label>
               <Popover>
@@ -306,32 +304,30 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
                     selected={formData.deadline}
                     onSelect={(date) => setFormData({...formData, deadline: date})}
                     initialFocus
-                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({...formData, notes: e.target.value})}
-                placeholder="Additional notes or context..."
-                rows={2}
-              />
-            </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" className="bg-gradient-primary">
-              {task ? 'Update Task' : 'Create Task'}
-            </Button>
+          <div className="flex justify-between pt-4 border-t">
+            <div>
+              {task && onDelete && (
+                <Button type="button" variant="destructive" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-gradient-primary">
+                {task ? 'Update Task' : 'Create Task'}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
