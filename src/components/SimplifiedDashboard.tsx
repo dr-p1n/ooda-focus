@@ -144,7 +144,6 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                     <TableHead>Deadline</TableHead>
                     <TableHead>Date Added</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Schedule</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -207,19 +206,6 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                               <SelectItem value="incomplete">To Do</SelectItem>
                               <SelectItem value="in-progress">In Progress</SelectItem>
                               <SelectItem value="complete">Complete</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                        <TableCell>
-                          <Select defaultValue={`${task.yearAssignment}-${task.monthAssignment}`}>
-                            <SelectTrigger className="w-24 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="2024-1">Jan 2024</SelectItem>
-                              <SelectItem value="2024-2">Feb 2024</SelectItem>
-                              <SelectItem value="2024-3">Mar 2024</SelectItem>
-                              <SelectItem value="2024-4">Apr 2024</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
