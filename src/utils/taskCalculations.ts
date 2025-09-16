@@ -12,11 +12,11 @@ export function calculateTaskMetrics(task: Task): TaskMetrics {
   
   // Eisenhower Quadrant based on importance and urgency
   let eisenhowerQuadrant: 1 | 2 | 3 | 4;
-  if (task.urgency >= 4 && task.importance >= 4) {
+  if (task.urgency >= 3 && task.importance >= 3) {
     eisenhowerQuadrant = 1; // Urgent + Important (Do First)
-  } else if (task.urgency < 4 && task.importance >= 4) {
+  } else if (task.urgency < 3 && task.importance >= 3) {
     eisenhowerQuadrant = 2; // Important but not Urgent (Schedule)
-  } else if (task.urgency >= 4 && task.importance < 4) {
+  } else if (task.urgency >= 3 && task.importance < 3) {
     eisenhowerQuadrant = 3; // Urgent but not Important (Delegate)
   } else {
     eisenhowerQuadrant = 4; // Neither (Eliminate)
@@ -54,10 +54,10 @@ export function getQuadrantLabel(quadrant: 1 | 2 | 3 | 4): string {
 }
 
 export function getPriorityLabel(score: number): string {
-  if (score >= 10) return 'Critical';
-  if (score >= 7) return 'High';
-  if (score >= 4) return 'Medium';
-  if (score >= 1) return 'Low';
+  if (score >= 6) return 'Critical';
+  if (score >= 4) return 'High';
+  if (score >= 2) return 'Medium';
+  if (score >= 0) return 'Low';
   return 'Very Low';
 }
 

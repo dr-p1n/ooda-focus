@@ -28,10 +28,10 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
     description: task?.description || '',
     category: task?.category || 'General',
     notes: task?.notes || '',
-    importance: task?.importance || 3,
-    urgency: task?.urgency || 3,
-    impact: task?.impact || 3,
-    effort: task?.effort || 3,
+    importance: task?.importance || 2,
+    urgency: task?.urgency || 2,
+    impact: task?.impact || 2,
+    effort: task?.effort || 2,
     estimatedTime: task?.estimatedTime || 60,
     status: task?.status || 'incomplete' as const,
     deadline: task?.deadline,
@@ -62,10 +62,10 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
         description: '',
         category: 'General',
         notes: '',
-        importance: 3,
-        urgency: 3,
-        impact: 3,
-        effort: 3,
+        importance: 2,
+        urgency: 2,
+        impact: 2,
+        effort: 2,
         estimatedTime: 60,
         status: 'incomplete',
         deadline: undefined,
@@ -191,72 +191,72 @@ export function TaskFormDialog({ task, onSave, trigger }: TaskFormDialogProps) {
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-analytics" />
-                    Importance: {formData.importance}/5
+                    Importance: {formData.importance}/3
                   </Label>
                   <Slider
                     value={[formData.importance]}
                     onValueChange={([value]) => setFormData({...formData, importance: value})}
                     min={1}
-                    max={5}
+                    max={3}
                     step={1}
                     className="w-full"
                   />
                   <div className="text-xs text-muted-foreground">
-                    How important is this for your goals?
+                    1: Low • 2: Medium • 3: High
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Zap className="h-4 w-4 text-danger" />
-                    Urgency: {formData.urgency}/5
+                    Urgency: {formData.urgency}/3
                   </Label>
                   <Slider
                     value={[formData.urgency]}
                     onValueChange={([value]) => setFormData({...formData, urgency: value})}
                     min={1}
-                    max={5}
+                    max={3}
                     step={1}
                     className="w-full"
                   />
                   <div className="text-xs text-muted-foreground">
-                    How time-sensitive is this?
+                    1: Can wait • 2: Soon • 3: Urgent
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Target className="h-4 w-4 text-success" />
-                    Impact: {formData.impact}/5
+                    Impact: {formData.impact}/3
                   </Label>
                   <Slider
                     value={[formData.impact]}
                     onValueChange={([value]) => setFormData({...formData, impact: value})}
                     min={1}
-                    max={5}
+                    max={3}
                     step={1}
                     className="w-full"
                   />
                   <div className="text-xs text-muted-foreground">
-                    What positive impact will this have?
+                    1: Small • 2: Moderate • 3: High impact
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <Weight className="h-4 w-4 text-warning" />
-                    Effort: {formData.effort}/5
+                    Effort: {formData.effort}/3
                   </Label>
                   <Slider
                     value={[formData.effort]}
                     onValueChange={([value]) => setFormData({...formData, effort: value})}
                     min={1}
-                    max={5}
+                    max={3}
                     step={1}
                     className="w-full"
                   />
                   <div className="text-xs text-muted-foreground">
-                    How much effort/difficulty is required?
+                    1: Easy • 2: Moderate • 3: Difficult
                   </div>
                 </div>
               </div>
