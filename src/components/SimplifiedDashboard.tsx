@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Target, Edit } from 'lucide-react';
+import { Plus, Target, Edit, ListTodo } from 'lucide-react';
 
 interface SimplifiedDashboardProps {
   tasks: Task[];
@@ -133,20 +133,10 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
         <div className="lg:col-span-2">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Tasks Overview</CardTitle>
-                <TaskFormDialog 
-                  onSave={(taskData) => {
-                    const newTask: Task = {
-                      ...taskData,
-                      id: Date.now().toString(),
-                      createdAt: new Date(),
-                      modifiedAt: new Date(),
-                    };
-                    onTaskUpdate([...tasks, newTask]);
-                  }}
-                />
-              </div>
+              <CardTitle className="flex items-center gap-2">
+                <ListTodo className="h-5 w-5" />
+                Task Manager
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>

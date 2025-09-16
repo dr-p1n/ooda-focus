@@ -75,7 +75,7 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Grid3x3 className="h-5 w-5" />
-          Strategic Analysis
+          Workload Window
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
