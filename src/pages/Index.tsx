@@ -4,7 +4,7 @@ import { SimplifiedDashboard } from '@/components/SimplifiedDashboard';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, User, Loader2 } from 'lucide-react';
+import { LogOut, User, Loader2, UserPlus } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -110,6 +110,17 @@ const Index = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => {
+                const inviteLink = window.location.origin;
+                navigator.clipboard.writeText(inviteLink);
+                toast({
+                  title: "Invite Link Copied",
+                  description: "Share this link to invite others to join Agenta.",
+                });
+              }}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Invite Users
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={handleSignOut}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Sign Out
