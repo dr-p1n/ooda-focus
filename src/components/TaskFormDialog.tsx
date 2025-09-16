@@ -63,7 +63,7 @@ export function TaskFormDialog({ task, trigger, projects, onSave, onDelete }: Ta
       description,
       category,
       notes,
-      project_id: projectId || undefined,
+      project_id: projectId === 'no-project' ? undefined : projectId,
       user_id: '', // This will be set by the parent component
       importance: importance[0],
       urgency: urgency[0],
@@ -144,7 +144,7 @@ export function TaskFormDialog({ task, trigger, projects, onSave, onDelete }: Ta
                   <SelectValue placeholder="Select project (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Project</SelectItem>
+                  <SelectItem value="no-project">No Project</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       <div className="flex items-center gap-2">

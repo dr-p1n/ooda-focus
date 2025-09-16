@@ -67,7 +67,7 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
       title: newTaskTitle,
       description: '',
       category: newTaskCategory,
-      project_id: newTaskProject || undefined,
+      project_id: newTaskProject === 'no-project' ? undefined : newTaskProject,
       user_id: user.id,
       importance: 3,
       urgency: 3,
@@ -225,7 +225,7 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                   <SelectValue placeholder="Select project" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Project</SelectItem>
+                  <SelectItem value="no-project">No Project</SelectItem>
                   {projects.map((project) => (
                     <SelectItem key={project.id} value={project.id}>
                       <div className="flex items-center gap-2">
