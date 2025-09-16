@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Task } from '@/types/task';
-import { ProductivityDashboard } from '@/components/ProductivityDashboard';
-import { TaskFormDialog } from '@/components/TaskFormDialog';
+import { SimplifiedDashboard } from '@/components/SimplifiedDashboard';
 import { useToast } from '@/hooks/use-toast';
 
 // Sample data for demonstration
@@ -173,75 +172,14 @@ const sampleTasks: Task[] = [
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(sampleTasks);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const { toast } = useToast();
-
-  const handleCreateTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'modifiedAt'>) => {
-    const newTask: Task = {
-      ...taskData,
-      id: Date.now().toString(),
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-    };
-    
-    setTasks(prev => [...prev, newTask]);
-    
-    toast({
-      title: "Task Created",
-      description: `"${newTask.title}" has been added to your task list.`,
-      variant: "default",
-    });
-  };
-
-  const handleUpdateTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'modifiedAt'>) => {
-    if (!selectedTask) return;
-    
-    const updatedTask: Task = {
-      ...taskData,
-      id: selectedTask.id,
-      createdAt: selectedTask.createdAt,
-      modifiedAt: new Date(),
-    };
-    
-    setTasks(prev => prev.map(task => 
-      task.id === selectedTask.id ? updatedTask : task
-    ));
-    
-    setSelectedTask(null);
-    
-    toast({
-      title: "Task Updated",
-      description: `"${updatedTask.title}" has been updated successfully.`,
-      variant: "default",
-    });
-  };
-
-  const handleTaskClick = (task: Task) => {
-    setSelectedTask(task);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-surface">
       <div className="container mx-auto px-4 py-8">
-        <ProductivityDashboard
+        <SimplifiedDashboard
           tasks={tasks}
-          onTaskClick={handleTaskClick}
-          onCreateTask={() => {/* This will be handled by the dialog trigger */}}
+          onTaskUpdate={setTasks}
         />
-        
-        {/* Task Creation Dialog */}
-        <TaskFormDialog
-          onSave={handleCreateTask}
-        />
-        
-        {/* Task Edit Dialog */}
-        {selectedTask && (
-          <TaskFormDialog
-            task={selectedTask}
-            onSave={handleUpdateTask}
-            trigger={<div />} // Hidden trigger since we control open state
-          />
-        )}
       </div>
     </div>
   );
