@@ -41,6 +41,143 @@ export type Database = {
         }
         Relationships: []
       }
+      projects: {
+        Row: {
+          color: string
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      task_invitations: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string
+          invited_email: string
+          status: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          status?: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          status?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          category: string
+          created_at: string
+          deadline: string | null
+          description: string | null
+          effort: number
+          estimated_time: number
+          id: string
+          impact: number
+          importance: number
+          modified_at: string
+          month_assignment: number | null
+          notes: string | null
+          project_id: string | null
+          scheduled_date: string | null
+          status: string
+          title: string
+          urgency: number
+          user_id: string
+          week_assignment: number | null
+          year_assignment: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          effort?: number
+          estimated_time?: number
+          id?: string
+          impact?: number
+          importance?: number
+          modified_at?: string
+          month_assignment?: number | null
+          notes?: string | null
+          project_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title: string
+          urgency?: number
+          user_id: string
+          week_assignment?: number | null
+          year_assignment?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          effort?: number
+          estimated_time?: number
+          id?: string
+          impact?: number
+          importance?: number
+          modified_at?: string
+          month_assignment?: number | null
+          notes?: string | null
+          project_id?: string | null
+          scheduled_date?: string | null
+          status?: string
+          title?: string
+          urgency?: number
+          user_id?: string
+          week_assignment?: number | null
+          year_assignment?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

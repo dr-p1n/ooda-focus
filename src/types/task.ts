@@ -1,9 +1,32 @@
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  color: string;
+  user_id: string;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface TaskInvitation {
+  id: string;
+  task_id: string;
+  invited_by: string;
+  invited_email: string;
+  status: 'pending' | 'accepted' | 'declined';
+  created_at: Date;
+  updated_at: Date;
+}
+
 export interface Task {
   id: string;
   title: string;
   description?: string;
   category: string;
   notes?: string;
+  project_id?: string;
+  user_id: string;
+  project?: Project; // For joined queries
   
   // Scoring system (1-5 scale)
   importance: number;  // How important is this task
