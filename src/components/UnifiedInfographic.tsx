@@ -107,32 +107,101 @@ export function UnifiedInfographic({ tasks, selectedTask, onTaskSelect }: Unifie
           />
         </div>
         
-        {/* Selected Task Details */}
+        {/* Selected Task Details with Context */}
         {selectedTask && (
-          <div className="p-3 bg-muted/20 rounded-lg border">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-semibold text-foreground">{selectedTask.title}</h4>
-              <Badge variant="outline" className="text-xs">
-                {selectedTask.category}
-              </Badge>
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="flex items-center gap-1">
-                <Target className="h-3 w-3" />
-                Priority: {calculateTaskMetrics(selectedTask).priorityScore.toFixed(1)}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            {/* Main Task Detail */}
+            <div className="lg:col-span-2 p-3 bg-muted/20 rounded-lg border">
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="font-semibold text-foreground">{selectedTask.title}</h4>
+                <Badge variant="outline" className="text-xs">
+                  {selectedTask.category}
+                </Badge>
               </div>
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                Time: {Math.floor(selectedTask.estimatedTime / 60)}h {selectedTask.estimatedTime % 60}m
+              <div className="grid grid-cols-2 gap-2 text-xs mb-3">
+                <div className="flex items-center gap-1">
+                  <Target className="h-3 w-3" />
+                  Priority: {calculateTaskMetrics(selectedTask).priorityScore.toFixed(1)}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  Time: {Math.floor(selectedTask.estimatedTime / 60)}h {selectedTask.estimatedTime % 60}m
+                </div>
+                <div>Importance: {selectedTask.importance}/5</div>
+                <div>Urgency: {selectedTask.urgency}/5</div>
+                <div>Impact: {selectedTask.impact}/5</div>
+                <div>Effort: {selectedTask.effort}/5</div>
               </div>
-              <div>Importance: {selectedTask.importance}/3</div>
-              <div>Urgency: {selectedTask.urgency}/3</div>
-              <div>Impact: {selectedTask.impact}/3</div>
-              <div>Effort: {selectedTask.effort}/3</div>
+              {selectedTask.description && (
+                <p className="text-sm text-muted-foreground">{selectedTask.description}</p>
+              )}
             </div>
-            {selectedTask.description && (
-              <p className="text-sm text-muted-foreground mt-2">{selectedTask.description}</p>
-            )}
+
+            {/* Related Tasks Context */}
+            <div className="p-3 bg-card rounded-lg border">
+              <h5 className="font-medium text-foreground mb-2 text-sm">Related Tasks</h5>
+              <div className="space-y-2">
+                {(() => {
+                  // Find similar tasks (same category, similar priority, or same project)
+                  const selectedMetrics = calculateTaskMetrics(selectedTask);
+                  const relatedTasks = incompleteTasks
+                    .filter(t => t.id !== selectedTask.id)
+                    .map(t => ({
+                      task: t,
+                      metrics: calculateTaskMetrics(t),
+                      similarity: 
+                        (t.category === selectedTask.category ? 2 : 0) +
+                        (t.project_id === selectedTask.project_id && t.project_id ? 1 : 0) +
+                        (Math.abs(calculateTaskMetrics(t).priorityScore - selectedMetrics.priorityScore) < 1 ? 1 : 0)
+                    }))
+                    .sort((a, b) => b.similarity - a.similarity || b.metrics.priorityScore - a.metrics.priorityScore)
+                    .slice(0, 4);
+
+                  return relatedTasks.length > 0 ? relatedTasks.map(({ task, metrics }) => (
+                    <div 
+                      key={task.id}
+                      className="p-2 bg-muted/30 rounded cursor-pointer hover:bg-muted/50 transition-all"
+                      onClick={() => onTaskSelect(task)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-foreground truncate">{task.title}</span>
+                        <Badge 
+                          variant="outline" 
+                          className={`text-xs ${
+                            metrics.priorityScore >= 6 ? 'bg-destructive/20 text-destructive border-destructive/30' :
+                            metrics.priorityScore >= 4 ? 'bg-warning/20 text-warning border-warning/30' :
+                            'bg-success/20 text-success border-success/30'
+                          }`}
+                        >
+                          {metrics.priorityScore.toFixed(1)}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="text-xs px-1 py-0">
+                          {task.category}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {Math.floor(task.estimatedTime / 60)}h {task.estimatedTime % 60}m
+                        </span>
+                      </div>
+                    </div>
+                  )) : (
+                    <div className="text-xs text-muted-foreground text-center py-2">
+                      No related tasks found
+                    </div>
+                  );
+                })()}
+              </div>
+              
+              {/* Quick action to see all in same category */}
+              <div className="mt-2 pt-2 border-t border-border">
+                <div className="text-xs text-muted-foreground">
+                  <span className="font-medium">
+                    {incompleteTasks.filter(t => t.category === selectedTask.category && t.id !== selectedTask.id).length}
+                  </span> more in {selectedTask.category}
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
