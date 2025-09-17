@@ -60,31 +60,72 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
     }
   };
 
-  const createTask = () => {
+  const createTask = async () => {
     if (!newTaskTitle.trim() || !user) return;
     
-    const newTask: Task = {
-      id: Date.now().toString(),
-      title: newTaskTitle,
-      description: '',
-      category: newTaskCategory,
-      project_id: newTaskProject === 'no-project' ? undefined : newTaskProject,
-      user_id: user.id,
-      importance: 3,
-      urgency: 3,
-      impact: 3,
-      effort: 3,
-      estimatedTime: 60,
-      status: 'incomplete',
-      createdAt: new Date(),
-      modifiedAt: new Date(),
-      yearAssignment: new Date().getFullYear(),
-      monthAssignment: new Date().getMonth() + 1,
-    };
+    try {
+      const taskData = {
+        title: newTaskTitle,
+        description: '',
+        category: newTaskCategory,
+        project_id: newTaskProject === 'no-project' ? null : newTaskProject,
+        user_id: user.id,
+        importance: 3,
+        urgency: 3,
+        impact: 3,
+        effort: 3,
+        estimated_time: 60,
+        status: 'incomplete',
+        year_assignment: new Date().getFullYear(),
+        month_assignment: new Date().getMonth() + 1,
+      };
 
-    onTaskUpdate([...tasks, newTask]);
-    setNewTaskTitle('');
-    setNewTaskProject('');
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert(taskData)
+        .select()
+        .single();
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create task. Please try again.",
+          variant: "destructive",
+        });
+        console.error('Error creating task:', error);
+        return;
+      }
+
+      if (data) {
+        const newTask: Task = {
+          ...data,
+          createdAt: new Date(data.created_at),
+          modifiedAt: new Date(data.modified_at),
+          estimatedTime: data.estimated_time,
+          yearAssignment: data.year_assignment,
+          monthAssignment: data.month_assignment,
+          deadline: data.deadline ? new Date(data.deadline) : undefined,
+          scheduledDate: data.scheduled_date ? new Date(data.scheduled_date) : undefined,
+          status: data.status as Task['status'],
+        };
+        
+        onTaskUpdate([...tasks, newTask]);
+        setNewTaskTitle('');
+        setNewTaskProject('');
+        
+        toast({
+          title: "Success",
+          description: "Task created successfully!",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create task. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const createProject = async (projectData: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
@@ -332,6 +373,7 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                     <TableHead>Task</TableHead>
                     <TableHead>Category</TableHead>
                     <TableHead>Priority Score</TableHead>
+                    <TableHead>Scoring Details</TableHead>
                     <TableHead>Deadline</TableHead>
                     <TableHead>Date Added</TableHead>
                     <TableHead>Status</TableHead>
@@ -375,6 +417,25 @@ export function SimplifiedDashboard({ tasks, onTaskUpdate }: SimplifiedDashboard
                             >
                               {metrics.priorityScore.toFixed(1)}
                             </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
+                              I: {task.importance}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
+                              U: {task.urgency}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
+                              Im: {task.impact}
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
+                              E: {task.effort}
+                            </Badge>
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            {formatTime(task.estimatedTime)}
                           </div>
                         </TableCell>
                         <TableCell>
