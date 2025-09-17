@@ -39,7 +39,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, userData?: any) => {
-    const redirectUrl = `${window.location.origin}/`;
+    // Use the published URL for production, fallback to current origin for development
+    const isProduction = window.location.hostname.includes('lovable.app');
+    const redirectUrl = isProduction 
+      ? `${window.location.origin}/`  // Use the current published URL
+      : `${window.location.origin}/`; // Use current origin for development
     
     const { error } = await supabase.auth.signUp({
       email,
