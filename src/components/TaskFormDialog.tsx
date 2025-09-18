@@ -29,8 +29,9 @@ import {
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon, Trash2 } from 'lucide-react';
+import { CalendarIcon, Trash2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ProjectDialog } from '@/components/ProjectDialog';
 
 interface TaskFormDialogProps {
   task?: Task;
@@ -38,9 +39,10 @@ interface TaskFormDialogProps {
   projects: Project[];
   onSave: (task: Omit<Task, 'id' | 'createdAt' | 'modifiedAt'>) => void;
   onDelete?: (taskId: string) => void;
+  onCreateProject?: (projectData: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => void;
 }
 
-export function TaskFormDialog({ task, trigger, projects, onSave, onDelete }: TaskFormDialogProps) {
+export function TaskFormDialog({ task, trigger, projects, onSave, onDelete, onCreateProject }: TaskFormDialogProps) {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(task?.title || '');
   const [description, setDescription] = useState(task?.description || '');
@@ -138,7 +140,19 @@ export function TaskFormDialog({ task, trigger, projects, onSave, onDelete }: Ta
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="project">Project</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="project">Project</Label>
+                {onCreateProject && (
+                  <ProjectDialog 
+                    onSave={onCreateProject}
+                    trigger={
+                      <Button variant="ghost" size="sm" className="h-auto p-1">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    }
+                  />
+                )}
+              </div>
               <Select value={projectId} onValueChange={setProjectId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select project (optional)" />
