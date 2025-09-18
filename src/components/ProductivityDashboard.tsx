@@ -22,8 +22,11 @@ import {
   Target,
   Zap,
   Clock,
-  Award
+  Award,
+  Settings
 } from 'lucide-react';
+import { ProductivityConfigDialog } from './ProductivityConfigDialog';
+import { useProductivityProfile } from '@/hooks/useProductivityProfile';
 
 interface ProductivityDashboardProps {
   tasks: Task[];
@@ -36,6 +39,8 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<FilterOptions>({ status: 'all' });
   const [sortBy, setSortBy] = useState<SortOption>('scheduling-weight-desc');
+  const [configOpen, setConfigOpen] = useState(false);
+  const { profile } = useProductivityProfile();
 
   // Filter and sort tasks
   const filteredAndSortedTasks = useMemo(() => {
@@ -58,7 +63,7 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
       return matchesSearch && matchesStatus && matchesCategory && matchesScore;
     });
 
-    return sortTasks(filtered, sortBy);
+    return sortTasks(filtered, sortBy, profile);
   }, [tasks, searchQuery, filters, sortBy]);
 
   // Calculate dashboard metrics
@@ -315,6 +320,11 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
           </div>
         )}
       </div>
+
+      <ProductivityConfigDialog 
+        open={configOpen} 
+        onOpenChange={setConfigOpen} 
+      />
     </div>
   );
 }
