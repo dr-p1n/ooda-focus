@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
 import { Task, ViewMode, FilterOptions, SortOption } from '@/types/task';
 import { calculateTaskMetrics, sortTasks, generateOptimalSchedule } from '@/utils/taskCalculations';
+import { calculateScoreCalibration, calibrateTask, getScoreBadgeVariant } from '@/utils/scoringCalibration';
 import { TaskCard } from '@/components/TaskCard';
 import { EisenhowerMatrix } from '@/components/EisenhowerMatrix';
 import { ImpactCostPlot } from '@/components/ImpactCostPlot';
+import { CalibrationDashboard } from '@/components/CalibrationDashboard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +25,8 @@ import {
   Zap,
   Clock,
   Award,
-  Settings
+  Settings,
+  BarChart3
 } from 'lucide-react';
 import { ProductivityConfigDialog } from './ProductivityConfigDialog';
 import { useProductivityProfile } from '@/hooks/useProductivityProfile';
@@ -42,6 +45,9 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
   const [configOpen, setConfigOpen] = useState(false);
   const { profile } = useProductivityProfile();
 
+  // Calculate calibration first
+  const calibration = useMemo(() => calculateScoreCalibration(tasks, profile), [tasks, profile]);
+
   // Filter and sort tasks
   const filteredAndSortedTasks = useMemo(() => {
     let filtered = tasks.filter(task => {
@@ -55,7 +61,7 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
       
       let matchesScore = true;
       if (filters.scoreRange) {
-        const metrics = calculateTaskMetrics(task);
+        const metrics = calculateTaskMetrics(task, profile);
         matchesScore = metrics.priorityScore >= filters.scoreRange[0] && 
                       metrics.priorityScore <= filters.scoreRange[1];
       }
@@ -64,34 +70,42 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
     });
 
     return sortTasks(filtered, sortBy, profile);
-  }, [tasks, searchQuery, filters, sortBy]);
+  }, [tasks, searchQuery, filters, sortBy, profile]);
 
-  // Calculate dashboard metrics
+  // Create calibrated tasks
+  const calibratedTasks = useMemo(() => {
+    return filteredAndSortedTasks.map(task => calibrateTask(task, calibration, profile));
+  }, [filteredAndSortedTasks, calibration, profile]);
+
+  // Calculate dashboard metrics using calibrated data
   const dashboardMetrics = useMemo(() => {
-    const incompleteTasks = tasks.filter(t => t.status !== 'complete');
-    const completedTasks = tasks.filter(t => t.status === 'complete');
+    const totalTasks = calibratedTasks.length;
+    const completeTasks = calibratedTasks.filter(t => t.status === 'complete').length;
+    const inProgressTasks = calibratedTasks.filter(t => t.status === 'in-progress').length;
+    const incompleteTasks = calibratedTasks.filter(t => t.status === 'incomplete').length;
     
-    const totalTasks = tasks.length;
-    const completionRate = totalTasks > 0 ? (completedTasks.length / totalTasks) * 100 : 0;
+    const completionRate = totalTasks > 0 ? (completeTasks / totalTasks) * 100 : 0;
+    const averageScore = calibration.averages.overall;
     
-    const averagePriority = incompleteTasks.length > 0 
-      ? incompleteTasks.reduce((sum, task) => sum + calculateTaskMetrics(task).priorityScore, 0) / incompleteTasks.length
-      : 0;
+    const criticalTasks = calibratedTasks.filter(t => t.priorityLevel === 'critical').length;
+    const highPriorityTasks = calibratedTasks.filter(t => t.priorityLevel === 'high').length;
     
-    const highPriorityTasks = incompleteTasks.filter(task => calculateTaskMetrics(task).priorityScore >= 7).length;
-    
-    const totalEstimatedTime = incompleteTasks.reduce((sum, task) => sum + task.estimatedTime, 0);
-    
+    const totalEstimatedTime = calibratedTasks
+      .filter(t => t.status !== 'complete')
+      .reduce((sum, task) => sum + task.estimatedTime, 0);
+
     return {
       totalTasks,
-      incompleteTasks: incompleteTasks.length,
-      completedTasks: completedTasks.length,
+      completeTasks,
+      inProgressTasks, 
+      incompleteTasks,
       completionRate,
-      averagePriority,
+      averageScore,
+      criticalTasks,
       highPriorityTasks,
       totalEstimatedTime,
     };
-  }, [tasks]);
+  }, [calibratedTasks, calibration]);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -100,8 +114,6 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const optimizedSchedule = generateOptimalSchedule(tasks);
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -109,63 +121,87 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
         <div>
           <h1 className="text-3xl font-bold text-foreground">Agenta</h1>
           <p className="text-muted-foreground">
-            Time cost balance sheet through Eisenhower Matrix and Impact/Cost analysis
+            Calibrated task prioritization with personalized productivity profiles
           </p>
         </div>
-        <Button onClick={onCreateTask} className="bg-gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Task
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={onCreateTask} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Task
+          </Button>
+          <Button variant="outline" onClick={() => setConfigOpen(true)} className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Configure
+          </Button>
+        </div>
       </div>
 
       {/* Dashboard Metrics */}
       {activeView === 'dashboard' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Target className="h-8 w-8 text-primary" />
-                <div>
-                  <div className="text-2xl font-bold">{dashboardMetrics.incompleteTasks}</div>
-                  <div className="text-sm text-muted-foreground">Active Tasks</div>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardMetrics.totalTasks}</div>
+              <p className="text-xs text-muted-foreground">
+                {dashboardMetrics.incompleteTasks} active
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Award className="h-8 w-8 text-success" />
-                <div>
-                  <div className="text-2xl font-bold">{dashboardMetrics.completionRate.toFixed(0)}%</div>
-                  <div className="text-sm text-muted-foreground">Completion Rate</div>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Completion Rate</CardTitle>
+              <Award className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardMetrics.completionRate.toFixed(0)}%</div>
+              <p className="text-xs text-muted-foreground">
+                Target: {((profile?.completionRateTarget || 0.8) * 100).toFixed(0)}%
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Zap className="h-8 w-8 text-warning" />
-                <div>
-                  <div className="text-2xl font-bold">{dashboardMetrics.highPriorityTasks}</div>
-                  <div className="text-sm text-muted-foreground">High Priority</div>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Average Score</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{dashboardMetrics.averageScore.toFixed(1)}</div>
+              <p className="text-xs text-muted-foreground">
+                {dashboardMetrics.averageScore >= calibration.percentiles.p75 ? 'Above average' : 
+                 dashboardMetrics.averageScore >= calibration.percentiles.p50 ? 'Near average' : 'Below average'}
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-8 w-8 text-analytics" />
-                <div>
-                  <div className="text-2xl font-bold">{formatTime(dashboardMetrics.totalEstimatedTime)}</div>
-                  <div className="text-sm text-muted-foreground">Total Time</div>
-                </div>
-              </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Critical Tasks</CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{dashboardMetrics.criticalTasks}</div>
+              <p className="text-xs text-muted-foreground">
+                Require immediate attention
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">High Priority</CardTitle>
+              <Target className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-orange-600">{dashboardMetrics.highPriorityTasks}</div>
+              <p className="text-xs text-muted-foreground">
+                Schedule this week
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -174,23 +210,12 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
       {/* View Tabs and Controls */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ViewMode)}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="dashboard" className="flex items-center gap-2">
-              <LayoutDashboard className="h-4 w-4" />
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger value="eisenhower" className="flex items-center gap-2">
-              <Grid3x3 className="h-4 w-4" />
-              Matrix
-            </TabsTrigger>
-            <TabsTrigger value="impact-cost" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Impact/Cost
-            </TabsTrigger>
-            <TabsTrigger value="schedule" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Schedule
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="calibration">Score Calibration</TabsTrigger>
+            <TabsTrigger value="eisenhower">Eisenhower Matrix</TabsTrigger>
+            <TabsTrigger value="impact-cost">Impact/Cost Plot</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -239,78 +264,84 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
       </div>
 
       {/* Main Content */}
-      <div className="min-h-[600px]">
-        {activeView === 'dashboard' && (
+      <Tabs value={activeView} onValueChange={(value) => setActiveView(value as ViewMode)}>
+        <TabsContent value="dashboard" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Task List */}
             <div className="lg:col-span-2 space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold">
-                  Tasks ({filteredAndSortedTasks.length})
-                </h3>
-                <Badge variant="outline" className="font-mono">
-                  Avg Priority: {dashboardMetrics.averagePriority.toFixed(1)}
-                </Badge>
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Tasks</h3>
+                <div className="text-sm text-muted-foreground">
+                  Showing {calibratedTasks.length} calibrated tasks
+                </div>
               </div>
-              
-              <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                {filteredAndSortedTasks.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onClick={() => onTaskClick?.(task)}
-                  />
-                ))}
-                {filteredAndSortedTasks.length === 0 && (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No tasks found matching your criteria</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Optimal Schedule Sidebar */}
-            <div>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5 text-analytics" />
-                    OODA Optimized Schedule
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground">
-                    Recommended task sequence for maximum decision velocity
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-                  {optimizedSchedule.slice(0, 10).map((task, index) => (
-                    <div key={task.id} className="flex items-center gap-3">
-                      <Badge variant="outline" className="font-mono text-xs w-6 h-6 flex items-center justify-center">
-                        {index + 1}
-                      </Badge>
-                      <TaskCard
-                        task={task}
+              {calibratedTasks.length === 0 ? (
+                <p className="text-muted-foreground">No tasks found matching your criteria.</p>
+              ) : (
+                <div className="space-y-3">
+                  {calibratedTasks.map((task) => (
+                    <div key={task.id} className="relative">
+                      <TaskCard 
+                        task={task} 
                         onClick={() => onTaskClick?.(task)}
-                        compact={true}
-                        showMetrics={false}
                       />
+                      <div className="absolute top-2 right-2 flex gap-2">
+                        <Badge variant={getScoreBadgeVariant(task.priorityLevel)}>
+                          {task.calibratedScore}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {Math.round(task.scorePercentile)}%
+                        </Badge>
+                      </div>
+                      <div className="mt-2 text-xs text-muted-foreground">
+                        {task.scoreInterpretation}
+                      </div>
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold">Optimized Schedule</h3>
+              <div className="text-sm text-muted-foreground mb-4">
+                Based on your productivity profile and calibrated scoring
+              </div>
+              {generateOptimalSchedule(tasks, profile).slice(0, 8).map((task, index) => {
+                const calibratedTask = calibrateTask(task, calibration, profile);
+                return (
+                  <div key={task.id} className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center">
+                      {index + 1}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm">{task.title}</div>
+                      <div className="text-xs text-muted-foreground truncate">
+                        {calibratedTask.scoreInterpretation}
+                      </div>
+                    </div>
+                    <Badge variant={getScoreBadgeVariant(calibratedTask.priorityLevel)} className="text-xs">
+                      {calibratedTask.calibratedScore}
+                    </Badge>
+                  </div>
+                );
+              })}
             </div>
           </div>
-        )}
+        </TabsContent>
 
-        {activeView === 'eisenhower' && (
+        <TabsContent value="calibration" className="space-y-6">
+          <CalibrationDashboard tasks={tasks} profile={profile} />
+        </TabsContent>
+
+        <TabsContent value="eisenhower" className="space-y-6">
           <EisenhowerMatrix tasks={filteredAndSortedTasks} onTaskClick={onTaskClick} />
-        )}
+        </TabsContent>
 
-        {activeView === 'impact-cost' && (
+        <TabsContent value="impact-cost" className="space-y-6">
           <ImpactCostPlot tasks={filteredAndSortedTasks} onTaskClick={onTaskClick} />
-        )}
+        </TabsContent>
 
-        {activeView === 'schedule' && (
+        <TabsContent value="schedule" className="space-y-6">
           <div className="text-center py-12">
             <Calendar className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
             <h3 className="text-xl font-semibold mb-2">Schedule View</h3>
@@ -318,8 +349,8 @@ export function ProductivityDashboard({ tasks, onTaskClick, onCreateTask }: Prod
               Advanced scheduling interface coming soon...
             </p>
           </div>
-        )}
-      </div>
+        </TabsContent>
+      </Tabs>
 
       <ProductivityConfigDialog 
         open={configOpen} 
