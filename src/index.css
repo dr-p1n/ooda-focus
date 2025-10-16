@@ -6,74 +6,74 @@
 
 @layer base {
   :root {
-    /* Core Background & Surface */
-    --background: 220 15% 97%;
-    --foreground: 220 10% 15%;
-    --surface: 220 15% 99%;
-    --surface-secondary: 220 10% 95%;
+    /* Core Background & Surface - Dark Mode */
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+    --surface: 0 0% 10%;
+    --surface-secondary: 0 0% 14%;
 
-    /* Card System */
-    --card: 0 0% 100%;
-    --card-foreground: 220 10% 15%;
-    --card-hover: 220 15% 98%;
+    /* Card System - Dark with subtle elevation */
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+    --card-hover: 0 0% 15%;
 
     /* Popover System */
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 10% 15%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Strategic Primary - Navy Blue for Trust & Analytics */
-    --primary: 220 60% 20%;
-    --primary-light: 220 45% 35%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 220 100% 65%;
+    /* Primary - Coral/Orange Accent */
+    --primary: 12 72% 66%;
+    --primary-light: 12 72% 75%;
+    --primary-foreground: 0 0% 10%;
+    --primary-glow: 12 82% 60%;
 
-    /* Success - Emerald for Completion & High Impact */
-    --success: 142 76% 36%;
-    --success-light: 142 69% 50%;
-    --success-foreground: 0 0% 100%;
+    /* Success - Green for Completion */
+    --success: 142 76% 45%;
+    --success-light: 142 69% 55%;
+    --success-foreground: 0 0% 10%;
 
-    /* Warning - Amber for Urgency */
-    --warning: 38 92% 50%;
+    /* Warning - Yellow/Orange for Pending */
+    --warning: 38 92% 55%;
     --warning-light: 38 92% 65%;
-    --warning-foreground: 38 92% 15%;
+    --warning-foreground: 0 0% 10%;
 
-    /* Danger - Red for High Effort/Overdue */
-    --danger: 0 72% 51%;
+    /* Danger - Red for Overdue/Critical */
+    --danger: 0 72% 55%;
     --danger-light: 0 72% 65%;
-    --danger-foreground: 0 0% 100%;
+    --danger-foreground: 0 0% 10%;
 
-    /* Analytics Purple for Data Visualizations */
-    --analytics: 259 94% 51%;
-    --analytics-light: 259 85% 65%;
-    --analytics-foreground: 0 0% 100%;
+    /* Analytics - Purple for Data */
+    --analytics: 259 94% 60%;
+    --analytics-light: 259 85% 70%;
+    --analytics-foreground: 0 0% 10%;
 
     /* Eisenhower Matrix Quadrants */
-    --quadrant-1: 0 72% 51%;      /* Urgent + Important - Red */
-    --quadrant-2: 142 76% 36%;    /* Important - Green */
-    --quadrant-3: 38 92% 50%;     /* Urgent - Amber */
-    --quadrant-4: 220 13% 69%;    /* Neither - Gray */
+    --quadrant-1: 0 72% 55%;      /* Urgent + Important - Red */
+    --quadrant-2: 142 76% 45%;    /* Important - Green */
+    --quadrant-3: 38 92% 55%;     /* Urgent - Amber */
+    --quadrant-4: 0 0% 40%;       /* Neither - Gray */
 
     /* Muted & Accent */
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 220 15% 92%;
-    --accent-foreground: 220 60% 20%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 12 72% 66%;
 
     /* Borders & Inputs */
-    --border: 220 13% 87%;
-    --input: 220 13% 87%;
-    --ring: 220 60% 20%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 12 72% 66%;
 
     /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(var(--success-light)));
-    --gradient-analytics: linear-gradient(135deg, hsl(var(--analytics)), hsl(var(--analytics-light)));
-    --gradient-surface: linear-gradient(180deg, hsl(var(--surface)), hsl(var(--surface-secondary)));
+    --gradient-primary: linear-gradient(135deg, hsl(12 72% 66%), hsl(12 82% 60%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 45%), hsl(142 69% 55%));
+    --gradient-analytics: linear-gradient(135deg, hsl(259 94% 60%), hsl(259 85% 70%));
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 10%), hsl(0 0% 14%));
 
-    /* Shadows */
-    --shadow-card: 0 1px 3px 0 hsl(var(--primary) / 0.1), 0 1px 2px 0 hsl(var(--primary) / 0.06);
-    --shadow-elevated: 0 10px 25px -5px hsl(var(--primary) / 0.1), 0 4px 6px -2px hsl(var(--primary) / 0.05);
-    --shadow-glow: 0 0 20px hsl(var(--primary-glow) / 0.3);
+    /* Shadows - Subtle for dark mode */
+    --shadow-card: 0 2px 8px 0 hsl(0 0% 0% / 0.3);
+    --shadow-elevated: 0 10px 30px -5px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 30px hsl(12 82% 60% / 0.2);
 
     /* Transitions */
     --transition-base: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -83,84 +83,73 @@
     --radius: 0.75rem;
 
     /* Sidebar System */
-    --sidebar-background: 220 15% 97%;
-    --sidebar-foreground: 220 10% 25%;
-    --sidebar-primary: 220 60% 20%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 10% 92%;
-    --sidebar-accent-foreground: 220 60% 20%;
-    --sidebar-border: 220 13% 87%;
-    --sidebar-ring: 220 60% 20%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 12 72% 66%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 12 72% 66%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 12 72% 66%;
   }
 
   .dark {
-    /* Core Background & Surface */
-    --background: 220 15% 8%;
-    --foreground: 220 10% 90%;
-    --surface: 220 15% 10%;
-    --surface-secondary: 220 10% 12%;
+    /* Same as root - dark mode is default */
+    --background: 0 0% 6%;
+    --foreground: 0 0% 95%;
+    --surface: 0 0% 10%;
+    --surface-secondary: 0 0% 14%;
 
-    /* Card System */
-    --card: 220 15% 10%;
-    --card-foreground: 220 10% 90%;
-    --card-hover: 220 15% 12%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+    --card-hover: 0 0% 15%;
 
-    /* Popover System */
-    --popover: 220 15% 10%;
-    --popover-foreground: 220 10% 90%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 95%;
 
-    /* Strategic Primary - Lighter for dark mode */
-    --primary: 220 60% 85%;
-    --primary-light: 220 45% 75%;
-    --primary-foreground: 220 15% 8%;
-    --primary-glow: 220 100% 70%;
+    --primary: 12 72% 66%;
+    --primary-light: 12 72% 75%;
+    --primary-foreground: 0 0% 10%;
+    --primary-glow: 12 82% 60%;
 
-    /* Success - Adjusted for dark mode */
     --success: 142 76% 45%;
-    --success-light: 142 69% 60%;
-    --success-foreground: 220 15% 8%;
+    --success-light: 142 69% 55%;
+    --success-foreground: 0 0% 10%;
 
-    /* Warning - Adjusted for dark mode */
-    --warning: 38 92% 60%;
-    --warning-light: 38 92% 75%;
-    --warning-foreground: 38 92% 10%;
+    --warning: 38 92% 55%;
+    --warning-light: 38 92% 65%;
+    --warning-foreground: 0 0% 10%;
 
-    /* Danger - Adjusted for dark mode */
-    --danger: 0 72% 60%;
-    --danger-light: 0 72% 75%;
-    --danger-foreground: 220 15% 8%;
+    --danger: 0 72% 55%;
+    --danger-light: 0 72% 65%;
+    --danger-foreground: 0 0% 10%;
 
-    /* Analytics Purple - Adjusted for dark mode */
-    --analytics: 259 94% 65%;
-    --analytics-light: 259 85% 75%;
-    --analytics-foreground: 220 15% 8%;
+    --analytics: 259 94% 60%;
+    --analytics-light: 259 85% 70%;
+    --analytics-foreground: 0 0% 10%;
 
-    /* Eisenhower Matrix Quadrants - Dark mode */
-    --quadrant-1: 0 72% 60%;      /* Urgent + Important - Red */
-    --quadrant-2: 142 76% 45%;    /* Important - Green */
-    --quadrant-3: 38 92% 60%;     /* Urgent - Amber */
-    --quadrant-4: 220 13% 50%;    /* Neither - Gray */
+    --quadrant-1: 0 72% 55%;
+    --quadrant-2: 142 76% 45%;
+    --quadrant-3: 38 92% 55%;
+    --quadrant-4: 0 0% 40%;
 
-    /* Muted & Accent */
-    --muted: 220 10% 15%;
-    --muted-foreground: 220 10% 65%;
-    --accent: 220 15% 15%;
-    --accent-foreground: 220 60% 85%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 16%;
+    --accent-foreground: 12 72% 66%;
 
-    /* Borders & Inputs */
-    --border: 220 13% 20%;
-    --input: 220 13% 20%;
-    --ring: 220 60% 85%;
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 12 72% 66%;
 
-    /* Sidebar System - Dark mode */
-    --sidebar-background: 220 15% 8%;
-    --sidebar-foreground: 220 10% 80%;
-    --sidebar-primary: 220 60% 70%;
-    --sidebar-primary-foreground: 220 15% 8%;
-    --sidebar-accent: 220 10% 15%;
-    --sidebar-accent-foreground: 220 60% 85%;
-    --sidebar-border: 220 13% 20%;
-    --sidebar-ring: 220 60% 70%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 12 72% 66%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 12 72% 66%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 12 72% 66%;
   }
 }
 
